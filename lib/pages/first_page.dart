@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/hive-adapters/boxes.dart';
+import 'package:flutter_project/hive-adapters/employee.dart';
 import 'package:flutter_project/pages/second_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
@@ -14,22 +17,38 @@ class _FirstPageState extends State<FirstPage> {
   List<String> jobTitles = ["IT support", "Constructor", "Accountant"];
   String? dropDownValue = "IT support";
   DateTime dateOfBirth = DateTime.now();
-  TimeOfDay arrivalTime = TimeOfDay.now();
-  TimeOfDay departureTime = TimeOfDay.now();
+  DateTime arrivalTime = DateTime.now();
+  DateTime departureTime = DateTime.now();
+
+  void showToastOnSuccess() {
+    Fluttertoast.showToast(
+        msg: "Employee added successfully",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 5,
+        backgroundColor: Colors.blueGrey,
+        textColor: Colors.white);
+  }
+
+  void _addAnEmployee() {
+    employeeBox.put(
+        "key_${employeeBox.length}",
+        Employee(
+            name: _nameTextController.text,
+            surname: _surnameTextController.text,
+            jobTitle: dropDownValue ?? "",
+            dateOfBirth: dateOfBirth,
+            arrivalTime: arrivalTime,
+            departureTime: departureTime));
+    showToastOnSuccess();
+    print(employeeBox.length);
+    _nameTextController.text = "";
+    _surnameTextController.text = "";
+  }
 
   void _navigateToSecondPage() {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => SecondPage(
-                  nameInputText: _nameTextController.text,
-                  surnameInputText: _surnameTextController.text,
-                  jobTitle: dropDownValue ?? "",
-                  birthDate: dateOfBirth,
-                  timeOfArrival: arrivalTime,
-                  //uredi
-                  timeOfDepart: departureTime, //uredi
-                )));
+        context, MaterialPageRoute(builder: (context) => const SecondPage()));
   }
 
   void _changeDropDownValue(String? selectedValue) {
@@ -40,22 +59,36 @@ class _FirstPageState extends State<FirstPage> {
 
   void _selectArrivalTime() async {
     final selectedArrivalTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
+      context: context,
+      initialTime: TimeOfDay.now(),
     );
     if (selectedArrivalTime != null) {
       setState(() {
-        arrivalTime = selectedArrivalTime;
+        DateTime currentDate = DateTime.now();
+        arrivalTime = DateTime(
+            currentDate.year,
+            currentDate.month,
+            currentDate.day,
+            selectedArrivalTime.hour,
+            selectedArrivalTime.minute);
       });
     }
-  }void _selectDepartureTime() async {
+  }
+
+  void _selectDepartureTime() async {
     final selectedDepartureTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
+      context: context,
+      initialTime: TimeOfDay.now(),
     );
     if (selectedDepartureTime != null) {
       setState(() {
-        departureTime = selectedDepartureTime;
+        DateTime currentDate = DateTime.now();
+        departureTime = DateTime(
+            currentDate.year,
+            currentDate.month,
+            currentDate.day,
+            selectedDepartureTime.hour,
+            selectedDepartureTime.minute);
       });
     }
   }
@@ -116,30 +149,28 @@ class _FirstPageState extends State<FirstPage> {
               MaterialButton(
                 onPressed: _selectArrivalTime,
                 child: const Text(
-                    "Select time of arrrival.",
-                  style: TextStyle(
-                      backgroundColor: Colors.teal
-                  ),
+                  "Select time of arrrival.",
+                  style: TextStyle(backgroundColor: Colors.teal),
                 ),
               ),
               Text(
-                  "Chosen time of arrival: ${arrivalTime.format(context).toString()}",
+                "Chosen time of arrival: ${"${arrivalTime.hour}:${arrivalTime.minute}"}",
               ),
               MaterialButton(
                 onPressed: _selectDepartureTime,
                 child: const Text(
                   "Select time of departure.",
-                  style: TextStyle(
-                      backgroundColor: Colors.teal
-                  ),
+                  style: TextStyle(backgroundColor: Colors.teal),
                 ),
               ),
               Text(
-                "Chosen time of departure: ${departureTime.format(context).toString()}",
+                "Chosen time of departure: ${"${departureTime.hour}:${departureTime.minute}"}",
               ),
               TextButton(
+                  onPressed: _addAnEmployee, child: const Text("Submit")),
+              TextButton(
                   onPressed: _navigateToSecondPage,
-                  child: const Text("Submit")),
+                  child: const Text("Employee List")),
             ],
           ),
         ),

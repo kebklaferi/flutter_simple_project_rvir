@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/hive-adapters/employee.dart';
 import 'package:flutter_project/pages/first_page.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+import 'hive-adapters/boxes.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(EmployeeAdapter());
+  employeeBox = await Hive.openBox<Employee>('employeeBox');
   runApp(const MyApp());
 }
 
