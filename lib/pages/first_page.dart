@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/hive-adapters/boxes.dart';
 import 'package:flutter_project/hive-adapters/employee.dart';
 import 'package:flutter_project/pages/second_page.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:toastification/toastification.dart';
 
 class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
@@ -21,29 +21,38 @@ class _FirstPageState extends State<FirstPage> {
   DateTime departureTime = DateTime.now();
 
   void showToastOnSuccess() {
-    Fluttertoast.showToast(
-        msg: "Employee added successfully",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 5,
-        backgroundColor: Colors.blueGrey,
-        textColor: Colors.white);
+    toastification.show(
+        context: context,
+        title: "Employee added successfully",
+      autoCloseDuration: const Duration(seconds: 3)
+    );
+  }
+  void showToastOnFailure() {
+    toastification.show(
+        context: context,
+        title: "Ops, there was an error.",
+      autoCloseDuration: const Duration(seconds: 3)
+    );
   }
 
   void _addAnEmployee() {
-    employeeBox.put(
-        "key_${employeeBox.length}",
-        Employee(
-            name: _nameTextController.text,
-            surname: _surnameTextController.text,
-            jobTitle: dropDownValue ?? "",
-            dateOfBirth: dateOfBirth,
-            arrivalTime: arrivalTime,
-            departureTime: departureTime));
-    showToastOnSuccess();
-    print(employeeBox.length);
-    _nameTextController.text = "";
-    _surnameTextController.text = "";
+    if(_nameTextController.text.isEmpty){
+      showToastOnFailure();
+    }
+    else {
+      employeeBox.put(
+          "key_${employeeBox.length}",
+          Employee(
+              name: _nameTextController.text,
+              surname: _surnameTextController.text,
+              jobTitle: dropDownValue ?? "",
+              dateOfBirth: dateOfBirth,
+              arrivalTime: arrivalTime,
+              departureTime: departureTime));
+      showToastOnSuccess();
+      _nameTextController.text = "";
+      _surnameTextController.text = "";
+    }
   }
 
   void _navigateToSecondPage() {
